@@ -1,69 +1,47 @@
 import streamlit as st
+import random
+# Importa a lista de perguntas do outro arquivo
+from perguntas import lista_perguntas
 
-# =========================================================================
-# BLOCO 1: CONFIGURAÇÕES E BANCO DE DADOS (Não mexer na estrutura)
-# =========================================================================
+# Configuração da página
 st.set_page_config(page_title="Quiz Bíblico Interativo", page_icon="📝", layout="centered")
 
-perguntas_biblicas = [
-    {
-        "pergunta": "Quem foi o homem mais velho mencionado na Bíblia?",
-        "opcoes": ["Matusalém", "Noé", "Adão", "Abraão"],
-        "correta": "Matusalém",
-        "curiosidade": "Matusalém viveu por 969 anos (Gênesis 5:27)."
-    },
-    {
-        "pergunta": "Qual foi o primeiro milagre público realizado por Jesus?",
-        "opcoes": ["Multiplicação dos pães", "Caminhar sobre as águas", "Transformação de água em vinho", "Ressurreição de Lázaro"],
-        "correta": "Transformação de água em vinho",
-        "curiosidade": "Este milagre aconteceu durante uma festa de casamento em Caná da Galileia (João 2:1-11)."
-    },
-    {
-        "pergunta": "Quantos livros tem a Bíblia Protestante / Evangélica completa?",
-        "opcoes": ["73 livros", "66 livros", "50 livros", "12 livros"],
-        "correta": "66 livros",
-        "curiosidade": "A Bíblia é dividida em 39 livros no Velho Testamento e 27 no Novo Testamento."
-    },
-    {
-        "pergunta": "Quem liderou o povo de Israel na travessia do Mar Vermelho?",
-        "opcoes": ["Josué", "Davi", "Moisés", "Arão"],
-        "correta": "Moisés",
-        "curiosidade": "Esse evento histórico e milagroso está registrado no livro de Êxodo, capítulo 14."
-    }
-]
-
-if "pergunta_atual" not in st.session_state:
+# Inicia as variáveis do jogo se elas não existirem
+if "perguntas_sorteadas" not in st.session_state:
+    # Sorteia 15 perguntas aleatórias da lista de 100+ para cada partida
+    st.session_state.perguntas_sorteadas = random.sample(lista_perguntas, k=min(15, len(lista_perguntas)))
     st.session_state.pergunta_atual = 0
-if "pontuacao" not in st.session_state:
     st.session_state.pontuacao = 0
 
+# Atalho para facilitar a leitura do código
+perguntas_partida = st.session_state.perguntas_sorteadas
 
 # =========================================================================
-# BLOCO 2: NOVO DESIGN VISUAL E BARRA DE PROGRESSO
+# DESIGN VISUAL E BARRA DE PROGRESSO
 # =========================================================================
 st.title("⛪ Gincana & Quiz Bíblico")
 st.markdown("##### *'Lâmpada para os meus pés é tua palavra e luz para o meu caminho.' — Salmo 119:105*")
 st.divider()
 
-# Cria a barra carregando no topo do quiz de forma automática
-if st.session_state.pergunta_atual < len(perguntas_biblicas):
-    progresso_porcentagem = (st.session_state.pergunta_atual) / len(perguntas_biblicas)
+if st.session_state.pergunta_atual < len(perguntas_partida):
+    progresso_porcentagem = (st.session_state.pergunta_atual) / len(perguntas_partida)
     st.progress(progresso_porcentagem, text=f"Progresso da Gincana: {int(progresso_porcentagem * 100)}%")
 else:
     st.progress(1.0, text="Gincana Concluída! 🎉")
 
-
 # =========================================================================
-# BLOCO 3: FUNCIONAMENTO DO JOGO (Sistema de perguntas)
+# SISTEMA DO JOGO ALEATÓRIO
 # =========================================================================
-if st.session_state.pergunta_atual < len(perguntas_biblicas):
-    dados_pergunta = perguntas_biblicas[st.session_state.pergunta_atual]
+if st.session_state.pergunta_atual < len(perguntas_partida):
+    dados_pergunta = perguntas_partida[st.session_state.pergunta_atual]
     
-    st.caption(f"Pergunta {st.session_state.pergunta_atual + 1} de {len(perguntas_biblicas)}")
+    st.caption(f"Pergunta {st.session_state.pergunta_atual + 1} de {len(perguntas_partida)}")
     st.subheader(dados_pergunta["pergunta"])
     
     with st.form(key=f"form_pergunta_{st.session_state.pergunta_atual}"):
-        resposta_usuario = st.radio("Escolha a alternativa correta:", dados_pergunta["opcoes"])
+        # Mistura as alternativas para não ficarem sempre na mesma ordem
+        opcoes_misturadas = dados_pergunta["opcoes"].copy()
+        resposta_usuario = st.radio("Escolha a alternativa correta:", opcoes_misturadas)
         enviar = st.form_submit_button("CONFERIR RESPOSTA", type="primary")
         
         if enviar:
@@ -82,9 +60,11 @@ if st.session_state.pergunta_atual < len(perguntas_biblicas):
 else:
     st.balloons()
     st.success("🎉 Parabéns! Você concluiu o Quiz Bíblico.")
-    st.metric(label="Sua Pontuação Final", value=f"{st.session_state.pontuacao} de {len(perguntas_biblicas)} acertos")
+    st.metric(label="Sua Pontuação Final", value=f"{st.session_state.pontuacao} de {len(perguntas_partida)} acertos")
     
     if st.button("🔄 JOGAR NOVAMENTE", use_container_width=True):
+        # Limpa o estado para sortear novas perguntas na próxima rodada
+        del st.session_state.perguntas_sorteadas
         st.session_state.pergunta_atual = 0
         st.session_state.pontuacao = 0
         st.rerun()
