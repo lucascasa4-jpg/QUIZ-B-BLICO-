@@ -1,9 +1,10 @@
 import streamlit as st
 
-# Configuração inicial da página do site
+# =========================================================================
+# BLOCO 1: CONFIGURAÇÕES E BANCO DE DADOS (Não mexer na estrutura)
+# =========================================================================
 st.set_page_config(page_title="Quiz Bíblico Interativo", page_icon="📝", layout="centered")
 
-# Banco de dados de perguntas e respostas
 perguntas_biblicas = [
     {
         "pergunta": "Quem foi o homem mais velho mencionado na Bíblia?",
@@ -31,27 +32,36 @@ perguntas_biblicas = [
     }
 ]
 
-# Título visual do portal
-st.title("📝 Gincana & Quiz Bíblico")
-st.write("Teste seus conhecimentos ou use as perguntas na sua célula e classe da EBD!")
-
-st.divider()
-
-# Usar o estado do Streamlit (session_state) para controlar em qual pergunta o usuário está
 if "pergunta_atual" not in st.session_state:
     st.session_state.pergunta_atual = 0
 if "pontuacao" not in st.session_state:
     st.session_state.pontuacao = 0
 
-# Verifica se o jogo ainda está acontecendo ou se chegou ao fim
+
+# =========================================================================
+# BLOCO 2: NOVO DESIGN VISUAL E BARRA DE PROGRESSO
+# =========================================================================
+st.title("⛪ Gincana & Quiz Bíblico")
+st.markdown("##### *'Lâmpada para os meus pés é tua palavra e luz para o meu caminho.' — Salmo 119:105*")
+st.divider()
+
+# Cria a barra carregando no topo do quiz de forma automática
+if st.session_state.pergunta_atual < len(perguntas_biblicas):
+    progresso_porcentagem = (st.session_state.pergunta_atual) / len(perguntas_biblicas)
+    st.progress(progresso_porcentagem, text=f"Progresso da Gincana: {int(progresso_porcentagem * 100)}%")
+else:
+    st.progress(1.0, text="Gincana Concluída! 🎉")
+
+
+# =========================================================================
+# BLOCO 3: FUNCIONAMENTO DO JOGO (Sistema de perguntas)
+# =========================================================================
 if st.session_state.pergunta_atual < len(perguntas_biblicas):
     dados_pergunta = perguntas_biblicas[st.session_state.pergunta_atual]
     
-    # Exibe o progresso
     st.caption(f"Pergunta {st.session_state.pergunta_atual + 1} de {len(perguntas_biblicas)}")
     st.subheader(dados_pergunta["pergunta"])
     
-    # Cria os botões de opção usando um formulário para processar o clique
     with st.form(key=f"form_pergunta_{st.session_state.pergunta_atual}"):
         resposta_usuario = st.radio("Escolha a alternativa correta:", dados_pergunta["opcoes"])
         enviar = st.form_submit_button("CONFERIR RESPOSTA", type="primary")
@@ -65,23 +75,19 @@ if st.session_state.pergunta_atual < len(perguntas_biblicas):
             
             st.info(f"📖 **Curiosidade Bíblica:** {dados_pergunta['curiosidade']}")
             
-    # Botão para avançar para a próxima etapa do jogo
     if st.button("PRÓXIMA PERGUNTA ➡️", use_container_width=True):
         st.session_state.pergunta_atual += 1
-        st.rerun() # Atualiza a tela para carregar a nova pergunta
+        st.rerun()
 
 else:
-    # Tela final do Quiz mostrando o resultado
     st.balloons()
     st.success("🎉 Parabéns! Você concluiu o Quiz Bíblico.")
     st.metric(label="Sua Pontuação Final", value=f"{st.session_state.pontuacao} de {len(perguntas_biblicas)} acertos")
     
-    # Botão para reiniciar o jogo do zero
     if st.button("🔄 JOGAR NOVAMENTE", use_container_width=True):
         st.session_state.pergunta_atual = 0
         st.session_state.pontuacao = 0
         st.rerun()
 
 st.divider()
-# Local estratégico para faturamento
 st.caption("ANÚNCIO: Fortaleça seu ministério conhecendo as ferramentas dos nossos parceiros abaixo.")
