@@ -1,0 +1,6 @@
+[theme]
+primaryColor = "#1E3A8A"          # Cor dos botões principais (Azul Marinho)
+backgroundColor = "#F8FAFC"      # Cor do fundo do site (Branco Gelo confortável)
+secondaryBackgroundColor = "#E2E8F0" # Cor dos cartões e caixas de perguntas (Cinza Claro)
+textColor = "#0F172A"            # Cor do texto principal (Preto Grafite)
+font = "sans serif"              # Tipo da fonte do site
